@@ -1,0 +1,44 @@
+name: Book Pilates Class
+
+on:
+  schedule:
+    # Run at 22:55 UTC every Saturday (23:55 CET in winter)
+    # Note: In summer (CEST), this is 00:55, so the script will wait until next midnight
+    - cron: '55 22 * * 6'
+
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  book:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run booking script
+        run: node src/book.js
+        env:
+          GYM_EMAIL: ${{ secrets.GYM_EMAIL }}
+          GYM_PASSWORD: ${{ secrets.GYM_PASSWORD }}
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: booking-screenshots-${{ github.run_number }}
+          path: |
+            *.png
+          retention-days: 30

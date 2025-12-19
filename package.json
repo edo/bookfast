@@ -1,0 +1,23 @@
+{
+  "name": "gym-booking-automation",
+  "version": "1.0.0",
+  "description": "Automated booking system for gym Pilates classes",
+  "type": "module",
+  "main": "src/book.js",
+  "scripts": {
+    "book": "node src/book.js",
+    "test": "node src/book.js --test"
+  },
+  "keywords": [
+    "automation",
+    "booking",
+    "playwright"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.49.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
+  }
+}
