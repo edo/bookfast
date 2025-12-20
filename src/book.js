@@ -120,6 +120,9 @@ async function bookPilates() {
     // Navigate to next week (7 days from now = next Saturday)
     console.log('Step 4: Navigating to next week...');
 
+    // Take screenshot before navigation
+    await page.screenshot({ path: 'step1b-before-next-week.png', fullPage: true });
+
     // Click the next period button (wire:click="nextPeriod")
     // There are 2 buttons (mobile + desktop), click the visible one
     const nextWeekButtons = page.locator('button[wire\\:click="nextPeriod"]');
@@ -131,7 +134,13 @@ async function bookPilates() {
         const button = nextWeekButtons.nth(i);
         if (await button.isVisible()) {
           await button.click();
+
+          // Wait for Livewire to update the page
+          // Give it extra time for the AJAX request and DOM update
+          await sleep(2000); // Wait 2 seconds for Livewire
           await page.waitForLoadState('networkidle');
+          await sleep(1000); // Extra safety margin
+
           console.log('Navigated to next week');
           break;
         }
