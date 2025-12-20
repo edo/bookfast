@@ -69,10 +69,8 @@ const app = {
   async authenticate(token) {
     try {
       this.api.setToken(token);
-      this.showStatus('auth-status', 'Authenticating...', 'info');
 
       const user = await this.api.testAuth();
-      this.showStatus('auth-status', `Authenticated as ${user.login}`, 'success');
 
       // Show main content
       document.getElementById('auth-section').style.display = 'none';
@@ -82,6 +80,8 @@ const app = {
       await this.loadClasses();
 
     } catch (error) {
+      // Show auth section if authentication fails
+      document.getElementById('auth-section').style.display = 'block';
       this.showStatus('auth-status', `Authentication failed: ${error.message}`, 'error');
       this.api.clearToken();
     }
