@@ -69,6 +69,11 @@ class GitHubAPI {
       throw new Error(error.message || `GitHub API error: ${response.status}`);
     }
 
+    // Handle 204 No Content responses (e.g., workflow dispatch)
+    if (response.status === 204) {
+      return null;
+    }
+
     return response.json();
   }
 
