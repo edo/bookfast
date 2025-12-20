@@ -80,33 +80,28 @@ export async function bookSingleClass(page, classConfig, lessonsUrl) {
     // CRITICAL: Find the correct day section first, then find the class within it
     console.log(`Step 5: Finding ${className} class on ${dayName} at ${timeSlot}...`);
 
-    // Strategy 1: Try to find day section first, then class within it
+    // Find all day sections (each has a day header with the day name)
+    // Based on HTML: <div class="text-lg font-semibold">zaterdag</div>
+    const dayHeaders = page.locator('.text-lg.font-semibold, .text-xl.font-semibold');
+    const dayHeaderCount = await dayHeaders.count();
+    console.log(`Found ${dayHeaderCount} total day headers`);
+
     let classBlock = null;
-    let foundViaDay = false;
 
-    try {
-      // Find the day section (look for day header text)
-      // The HTML has day sections with text like "maandag", "dinsdag", etc.
-      const dayHeaders = page.locator('.text-lg.font-semibold, .text-xl.font-semibold')
-        .filter({ hasText: new RegExp(dayName, 'i') });
+    // Find which header matches our target day
+    for (let i = 0; i < dayHeaderCount; i++) {
+      const header = dayHeaders.nth(i);
+      const headerText = await header.textContent();
 
-      const dayHeaderCount = await dayHeaders.count();
-      console.log(`Found ${dayHeaderCount} day header(s) matching "${dayName}"`);
+      if (headerText && headerText.trim().toLowerCase() === dayName.toLowerCase()) {
+        console.log(`Found matching day header: "${headerText.trim()}" at index ${i}`);
 
-      if (dayHeaderCount > 0) {
-        // Get the parent container of the day header
-        // Based on HTML structure, day content is in sibling or parent elements
-        const dayHeader = dayHeaders.first();
+        // The day section structure is: header is inside a parent div that contains the whole day
+        // Go up to the parent container (class="bg-white")
+        const dayContainer = header.locator('xpath=ancestor::div[contains(@class, "bg-white")]').first();
 
-        // Find the closest parent that contains the day section
-        const daySection = page.locator('.bg-white').filter(async (el) => {
-          const dayHeaderText = await dayHeader.textContent();
-          const sectionText = await el.textContent();
-          return sectionText.toLowerCase().includes(dayName.toLowerCase());
-        }).first();
-
-        // Within that day section, find the class by name and time
-        classBlock = daySection
+        // Within this day container, find classes matching our criteria
+        classBlock = dayContainer
           .locator('[wire\\:click*="showLessonModal"]')
           .filter({ hasText: className })
           .filter({ hasText: timeSlot });
@@ -115,16 +110,14 @@ export async function bookSingleClass(page, classConfig, lessonsUrl) {
         console.log(`Found ${classCount} matching class(es) in ${dayName} section`);
 
         if (classCount > 0) {
-          foundViaDay = true;
+          break; // Found it!
         }
       }
-    } catch (error) {
-      console.log(`Could not find via day section: ${error.message}`);
     }
 
-    // Strategy 2: Fallback to original method (find by class name and time)
-    if (!foundViaDay) {
-      console.log('Falling back to search by class name and time only...');
+    // Fallback: if day-specific search didn't work, search entire page
+    if (!classBlock || await classBlock.count() === 0) {
+      console.log('Day-specific search failed. Searching entire page...');
       classBlock = page.locator('[wire\\:click*="showLessonModal"]')
         .filter({ hasText: className })
         .filter({ hasText: timeSlot });
@@ -157,7 +150,7 @@ export async function bookSingleClass(page, classConfig, lessonsUrl) {
 
     // Wait for modal to appear
     console.log('Step 7: Waiting for modal...');
-    await page.waitForSelector('button[wire\\:click="registerForLesson"]', { timeout: 5000 });
+    await page.waitForSelector('button[wire\\:click="registerForLesson"]', { timeout: 10000 });
 
     await page.screenshot({ path: `${id}-step3-modal-open.png`, fullPage: true });
     console.log(`Screenshot saved: ${id}-step3-modal-open.png`);

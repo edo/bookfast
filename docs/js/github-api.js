@@ -5,8 +5,8 @@
 class GitHubAPI {
   constructor() {
     this.token = localStorage.getItem('github_token') || '';
-    this.owner = ''; // Will be set after authentication
-    this.repo = '';  // Will be set after authentication
+    this.owner = 'edo'; // Hardcoded repository owner
+    this.repo = 'bookfast';  // Hardcoded repository name
     this.apiBase = 'https://api.github.com';
     this.configPath = 'config/classes.json';
     this.configSha = null; // SHA of current config file
@@ -36,30 +36,11 @@ class GitHubAPI {
   }
 
   /**
-   * Detect repository from current URL or prompt user
+   * Get repository info (now hardcoded)
    */
   async detectRepository() {
-    // For GitHub Pages: username.github.io/repo-name
-    // We'll need to prompt user or store this info
-    const stored = localStorage.getItem('github_repo');
-    if (stored) {
-      const [owner, repo] = stored.split('/');
-      this.owner = owner;
-      this.repo = repo;
-      return { owner, repo };
-    }
-
-    // Prompt user for repository
-    const repoInput = prompt('Enter your GitHub repository (format: username/repo-name):');
-    if (repoInput) {
-      const [owner, repo] = repoInput.split('/');
-      this.owner = owner;
-      this.repo = repo;
-      localStorage.setItem('github_repo', `${owner}/${repo}`);
-      return { owner, repo };
-    }
-
-    throw new Error('Repository not configured');
+    // Repository is hardcoded in constructor, just return it
+    return { owner: this.owner, repo: this.repo };
   }
 
   /**
