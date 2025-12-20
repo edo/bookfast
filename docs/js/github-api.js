@@ -4,7 +4,7 @@
  */
 class GitHubAPI {
   constructor() {
-    this.token = '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'; // Hardcoded token
+    this.token = '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'; // Hardcoded token
     this.owner = 'edo'; // Hardcoded repository owner
     this.repo = 'bookfast';  // Hardcoded repository name
     this.apiBase = 'https://api.github.com';
