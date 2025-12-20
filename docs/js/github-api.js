@@ -4,7 +4,7 @@
  */
 class GitHubAPI {
   constructor() {
-    this.token = localStorage.getItem('github_token') || '';
+    this.token = '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'; // Hardcoded token
     this.owner = 'edo'; // Hardcoded repository owner
     this.repo = 'bookfast';  // Hardcoded repository name
     this.apiBase = 'https://api.github.com';

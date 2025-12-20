@@ -16,11 +16,9 @@ const app = {
     // Set up event listeners
     this.setupEventListeners();
 
-    // Check if token exists
+    // Auto-authenticate with hardcoded token
     const token = this.api.getToken();
-    if (token) {
-      await this.authenticate(token);
-    }
+    await this.authenticate(token);
   },
 
   /**
