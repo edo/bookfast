@@ -33,7 +33,7 @@ Go to your repository → Settings → Secrets and variables → Actions, and ad
 1. Enable GitHub Pages:
    - Go to Settings → Pages
    - Source: Deploy from a branch
-   - Branch: `main`, Folder: `/web`
+   - Branch: `main`, Folder: `/docs`
    - Click Save
 
 2. Visit your GitHub Pages URL:
@@ -141,7 +141,7 @@ bookfast/
 │       ├── booking-engine.js       # Core booking logic
 │       ├── scheduler.js            # Midnight wait logic
 │       └── retry-handler.js        # Retry logic
-├── web/
+├── docs/
 │   ├── index.html                  # Web interface
 │   ├── css/
 │   │   └── styles.css              # Styling
