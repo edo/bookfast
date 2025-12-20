@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookfast - Gym Class Manager</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <h1>📅 Bookfast</h1>
+      <p>Gym Class Booking Manager</p>
+    </header>
+
+    <!-- Auth Section -->
+    <div id="auth-section" class="card">
+      <h2>GitHub Authentication</h2>
+      <p class="help-text">
+        Enter your GitHub Personal Access Token to manage class configurations.
+        <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">Generate token</a>
+      </p>
+      <div class="form-group">
+        <label for="github-token">Personal Access Token:</label>
+        <input type="password" id="github-token" placeholder="ghp_xxxxx..." />
+        <button id="save-token-btn" class="btn btn-primary">Save Token</button>
+      </div>
+      <div id="auth-status" class="status-message"></div>
+    </div>
+
+    <!-- Main Content (hidden until authenticated) -->
+    <div id="main-content" style="display: none;">
+
+      <!-- Class List -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Configured Classes</h2>
+          <button id="add-class-btn" class="btn btn-success">+ Add Class</button>
+        </div>
+
+        <div id="classes-loading" class="loading">Loading classes...</div>
+        <div id="classes-error" class="error-message" style="display: none;"></div>
+
+        <table id="classes-table" style="display: none;">
+          <thead>
+            <tr>
+              <th>Enabled</th>
+              <th>Class Name</th>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="classes-tbody">
+            <!-- Dynamic content -->
+          </tbody>
+        </table>
+
+        <div id="no-classes" style="display: none;" class="help-text">
+          No classes configured yet. Click "Add Class" to get started.
+        </div>
+      </div>
+
+      <!-- Add/Edit Class Modal -->
+      <div id="class-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modal-title">Add Class</h2>
+            <span class="modal-close">&times;</span>
+          </div>
+
+          <form id="class-form">
+            <div class="form-group">
+              <label for="class-name">Class Name:</label>
+              <input type="text" id="class-name" required placeholder="e.g., Pilates, Yoga" />
+            </div>
+
+            <div class="form-group">
+              <label for="class-day">Day of Week:</label>
+              <select id="class-day" required>
+                <option value="">Select a day...</option>
+                <option value="0:zondag">Zondag (Sunday)</option>
+                <option value="1:maandag">Maandag (Monday)</option>
+                <option value="2:dinsdag">Dinsdag (Tuesday)</option>
+                <option value="3:woensdag">Woensdag (Wednesday)</option>
+                <option value="4:donderdag">Donderdag (Thursday)</option>
+                <option value="5:vrijdag">Vrijdag (Friday)</option>
+                <option value="6:zaterdag">Zaterdag (Saturday)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="class-time">Time:</label>
+              <input type="time" id="class-time" required />
+            </div>
+
+            <div class="form-group">
+              <label for="class-description">Description (optional):</label>
+              <input type="text" id="class-description" placeholder="e.g., Saturday morning Pilates" />
+            </div>
+
+            <div class="form-group">
+              <label for="class-enabled">
+                <input type="checkbox" id="class-enabled" checked />
+                Enabled (book this class automatically)
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="class-retries">Max Retries:</label>
+              <input type="number" id="class-retries" value="3" min="0" max="10" />
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Class</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card">
+        <h2>Actions</h2>
+        <div class="button-group">
+          <button id="test-workflow-btn" class="btn btn-primary">▶ Test Workflow</button>
+          <button id="view-logs-btn" class="btn btn-secondary">📋 View Logs</button>
+          <button id="refresh-btn" class="btn btn-secondary">🔄 Refresh</button>
+        </div>
+        <div id="action-status" class="status-message"></div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by <strong>Bookfast</strong> | <a href="https://github.com" target="_blank">GitHub</a></p>
+    </footer>
+
+  </div>
+
+  <script src="js/github-api.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

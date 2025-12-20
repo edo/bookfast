@@ -1,154 +1,302 @@
-# Gym Pilates Auto-Booking System
+# Bookfast - Multi-Class Gym Booking System
 
-Automated booking system for Saturday Pilates classes (08:30-09:25) at Sportcentrum De Trits.
+Automated booking system for gym classes at Sportcentrum De Trits with a user-friendly web interface.
+
+## Features
+
+- 📅 **Multi-class support**: Book multiple classes across different days of the week
+- 🌐 **Web interface**: User-friendly GUI to manage class configurations
+- 🔄 **Automatic retry**: Configurable retry logic for failed bookings
+- 📸 **Screenshots**: Automatic screenshots for debugging
+- ⚙️ **Daily automation**: Runs daily and books classes 7 days in advance
+
+## Quick Start
+
+### 1. Clone and Install
+
+```bash
+git clone https://github.com/YOUR_USERNAME/bookfast.git
+cd bookfast
+npm install
+npx playwright install chromium
+```
+
+### 2. Configure GitHub Secrets
+
+Go to your repository → Settings → Secrets and variables → Actions, and add:
+
+- `GYM_EMAIL`: Your gym account email
+- `GYM_PASSWORD`: Your gym account password
+
+### 3. Set Up the Web Interface
+
+1. Enable GitHub Pages:
+   - Go to Settings → Pages
+   - Source: Deploy from a branch
+   - Branch: `main`, Folder: `/web`
+   - Click Save
+
+2. Visit your GitHub Pages URL:
+   - `https://YOUR_USERNAME.github.io/bookfast/`
+
+3. Generate a Personal Access Token:
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Generate new token with `repo` scope
+   - Copy the token
+
+4. Configure classes via the web interface:
+   - Enter your GitHub token
+   - Enter repository name (e.g., `username/bookfast`)
+   - Add your classes with day, time, and preferences
+   - Save configuration
+
+### 4. Test the System
+
+```bash
+# Local test (skips midnight wait)
+npm run test
+
+# Or trigger workflow manually via GitHub Actions
+```
+
+## Web Interface
+
+The web interface allows your girlfriend to manage class bookings without touching code:
+
+### Features
+- ✅ Add/Edit/Delete classes
+- ✅ Enable/Disable classes with a toggle
+- ✅ Configure retry settings per class
+- ✅ Trigger workflows manually
+- ✅ View logs and screenshots
+
+### Usage
+1. Visit your GitHub Pages URL
+2. Authenticate with your GitHub token
+3. Add classes using the form:
+   - Class name (e.g., "Pilates")
+   - Day of week (e.g., "Zaterdag")
+   - Time slot (e.g., "08:30")
+4. Click Save - changes are committed to the repository
+5. The system automatically books enabled classes
 
 ## How It Works
 
-1. GitHub Actions triggers every Saturday at 23:55 CET
-2. Script waits until exactly midnight (00:00:00 CET)
-3. Logs into the gym's booking system
-4. Navigates to next week's Saturday
-5. Finds the Pilates class (08:30-09:25)
-6. Clicks to open the modal
-7. Clicks the "Inschrijven" (subscribe) button
-8. Takes screenshots for verification
+### Booking Flow
 
-## Setup Instructions
+1. **Daily workflow runs** at 22:55 UTC (23:55 CET)
+2. **Script waits** until exactly 00:00:10 CET
+3. **Loads configuration** from `config/classes.json`
+4. **Filters classes** for today's day of week
+5. **For each class**:
+   - Logs into gym website
+   - Navigates to lessons page
+   - Clicks "next week" to view classes 7 days ahead
+   - Finds the correct day section (e.g., "zaterdag")
+   - Finds the class by name and time within that day
+   - Clicks the class to open modal
+   - Clicks register button
+   - Takes screenshots
+   - Retries on failure (configurable)
 
-### 1. Local Testing (Optional but Recommended)
+### Configuration File
 
-First, test the script locally to ensure it works with your credentials:
+Classes are stored in `config/classes.json`:
 
-```bash
-# Install dependencies
-npm install
-
-# Install Playwright browsers
-npx playwright install chromium
-
-# Create a .env file with your credentials (this file is gitignored)
-echo "GYM_EMAIL=your-email@example.com" > .env
-echo "GYM_PASSWORD=your-password" >> .env
-
-# Run in test mode (skips midnight wait, shows browser)
-npm run test
+```json
+{
+  "version": "1.0",
+  "classes": [
+    {
+      "id": "pilates-sat-0830",
+      "enabled": true,
+      "className": "Pilates",
+      "timeSlot": "08:30",
+      "dayOfWeek": 6,
+      "dayName": "zaterdag",
+      "retryConfig": {
+        "maxRetries": 3,
+        "retryDelayMs": 5000
+      },
+      "description": "Saturday morning Pilates class"
+    }
+  ],
+  "globalSettings": {
+    "timezone": "Europe/Amsterdam",
+    "bookingStartTime": "00:00:10"
+  }
+}
 ```
-
-### 2. GitHub Setup
-
-1. **Create a GitHub repository**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: Gym booking automation"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/bookfast.git
-   git push -u origin main
-   ```
-
-2. **Add GitHub Secrets**
-   - Go to your repository on GitHub
-   - Click `Settings` → `Secrets and variables` → `Actions`
-   - Click `New repository secret`
-   - Add two secrets:
-     - Name: `GYM_EMAIL`, Value: your gym email
-     - Name: `GYM_PASSWORD`, Value: your gym password
-
-3. **Enable GitHub Actions**
-   - Go to the `Actions` tab in your repository
-   - Click `I understand my workflows, go ahead and enable them`
-
-### 3. Test the Workflow
-
-Trigger the workflow manually to test:
-
-1. Go to `Actions` tab
-2. Click on `Book Pilates Class` workflow
-3. Click `Run workflow` → `Run workflow`
-4. Wait for it to complete
-5. Download the screenshots artifact to verify
-
-### 4. Production
-
-The workflow will automatically run every Saturday at 23:55 CET and book the class at midnight.
 
 ## File Structure
 
 ```
 bookfast/
+├── config/
+│   └── classes.json                # Class configurations
 ├── src/
-│   └── book.js              # Main booking script
+│   ├── book.js                     # Main entry point
+│   └── lib/
+│       ├── config-loader.js        # Load/parse config
+│       ├── booking-engine.js       # Core booking logic
+│       ├── scheduler.js            # Midnight wait logic
+│       └── retry-handler.js        # Retry logic
+├── web/
+│   ├── index.html                  # Web interface
+│   ├── css/
+│   │   └── styles.css              # Styling
+│   └── js/
+│       ├── app.js                  # Main app logic
+│       ├── github-api.js           # GitHub API client
+│       └── validation.js           # Form validation
 ├── .github/
 │   └── workflows/
-│       └── book-pilates.yml # GitHub Actions workflow
-├── package.json             # Dependencies
-├── playwright.config.js     # Playwright configuration
-├── .gitignore              # Git ignore rules
-└── README.md               # This file
+│       └── book-classes.yml        # Daily workflow
+├── package.json                    # Dependencies
+├── playwright.config.js            # Playwright settings
+└── README.md                       # This file
 ```
+
+## Local Testing
+
+### Test with configuration file
+
+```bash
+# Test all classes configured for today
+npm run test
+
+# Test a specific class by ID
+node src/book.js --test --class=pilates-sat-0830
+```
+
+### Test workflow manually
+
+1. Go to GitHub Actions tab
+2. Click "Book Gym Classes" workflow
+3. Click "Run workflow"
+4. Download screenshots from artifacts
 
 ## Troubleshooting
 
-### Check the screenshots
+### Check Screenshots
 
-After each run, GitHub Actions uploads screenshots:
+After each run, screenshots are uploaded to GitHub Actions:
 1. Go to the workflow run
-2. Scroll to the bottom
-3. Download the `booking-screenshots-XXX` artifact
-4. Extract and review the PNG files
+2. Scroll to "Artifacts"
+3. Download `booking-screenshots-XXX.zip`
+4. Review PNG files:
+   - `{id}-step1-lessons-page.png`: Initial lessons page
+   - `{id}-step2-next-week.png`: After clicking "next week"
+   - `{id}-step3-modal-open.png`: Modal with register button
+   - `{id}-step4-after-register.png`: After clicking register
+   - `{id}-booking-result.png`: Final result
+   - `{id}-error-screenshot.png`: Error screenshot (if any)
 
 ### Common Issues
 
-**Login fails:**
-- Check that `GYM_EMAIL` and `GYM_PASSWORD` secrets are correct
-- Verify the login URL hasn't changed
+**Authentication fails:**
+- Check GitHub Secrets (`GYM_EMAIL`, `GYM_PASSWORD`)
+- Test locally with `.env` file
 
-**Can't find Pilates class:**
-- Check the screenshot `step2-next-week.png`
-- Verify the class is scheduled for that Saturday
-- The class name/time might have changed
+**Class not found:**
+- Check `step2-next-week.png` screenshot
+- Verify class name, day, and time in configuration
+- Ensure class exists in gym's schedule
 
-**Subscribe button not found:**
-- The class might be full
-- Check `step3-modal-open.png` for details
+**Already registered:**
+- System considers this a success
+- Check workflow logs for details
 
-### Manual Intervention
+**Class full:**
+- Booking will fail (non-retryable)
+- Check screenshots for confirmation
 
-If the automation fails, you can always book manually at midnight.
+**Retry limit reached:**
+- Check screenshots to diagnose issue
+- Increase `maxRetries` in class configuration
 
-## Timezone Notes
+### Debugging Tips
 
-- The script uses `Europe/Amsterdam` timezone (CET/CEST)
-- CET (winter): UTC+1
-- CEST (summer): UTC+2
-- GitHub Actions runs at 22:55 UTC, which is 23:55 CET (winter)
-- In summer (CEST), it runs at 00:55 CEST, but the script waits until the next midnight
+1. **Run locally in test mode**:
+   ```bash
+   npm run test
+   ```
+   This shows the browser and helps diagnose issues
+
+2. **Check workflow logs**:
+   - Go to Actions tab
+   - Click on the failed run
+   - Expand steps to see detailed logs
+
+3. **Validate configuration**:
+   - Ensure `config/classes.json` is valid JSON
+   - Check day names are in Dutch lowercase
+   - Verify time format is HH:MM
+
+## Advanced Configuration
+
+### Add a new class
+
+Via web interface:
+1. Click "Add Class"
+2. Fill in class details
+3. Click "Save Class"
+
+Via manual edit:
+1. Edit `config/classes.json`
+2. Add new class object to `classes` array
+3. Commit and push changes
+
+### Disable a class temporarily
+
+Via web interface:
+- Toggle the switch next to the class
+
+Via manual edit:
+- Set `"enabled": false` in configuration
+
+### Change retry behavior
+
+Edit retry config for specific class:
+
+```json
+"retryConfig": {
+  "maxRetries": 5,      // Increase retry count
+  "retryDelayMs": 10000 // Increase delay (10 seconds)
+}
+```
+
+### Change booking time
+
+Edit global settings:
+
+```json
+"globalSettings": {
+  "bookingStartTime": "00:00:05"  // Book at 5 seconds past midnight
+}
+```
+
+## Timezone Information
+
+- **Timezone**: `Europe/Amsterdam` (CET/CEST)
+- **CET** (winter): UTC+1
+- **CEST** (summer): UTC+2
+- **Workflow runs**: Daily at 22:55 UTC
+  - Winter: 23:55 CET (5 minutes before midnight)
+  - Summer: 00:55 CEST (script waits for next midnight)
+- **Booking time**: 00:00:10 CET (10 seconds past midnight)
 
 ## Security
 
-- Credentials are stored as encrypted GitHub Secrets
-- Never commit `.env` file to git
-- Screenshots are stored for 30 days and then automatically deleted
+- ✅ Credentials stored as encrypted GitHub Secrets
+- ✅ Web interface uses Personal Access Token (stored in browser)
+- ✅ `.env` file gitignored (never committed)
+- ✅ Screenshots auto-deleted after 30 days
+- ✅ Fine-grained access control via GitHub token scopes
 
-## Customization
+## Contributing
 
-To book a different class:
-
-1. Edit `src/book.js`
-2. Change the `pilatesBlock` filter:
-   ```javascript
-   const pilatesBlock = page.locator('[wire\\:click*="showLessonModal"]')
-     .filter({ hasText: 'YOUR_CLASS_NAME' })
-     .filter({ hasText: 'YOUR_TIME' });
-   ```
-
-To change the schedule:
-
-1. Edit `.github/workflows/book-pilates.yml`
-2. Modify the cron expression:
-   ```yaml
-   - cron: '55 22 * * 6'  # Saturday at 22:55 UTC
-   ```
+Feel free to submit issues or pull requests to improve the system!
 
 ## License
 

@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "classes": [
+    {
+      "id": "pilates-sat-0830",
+      "enabled": true,
+      "className": "Pilates",
+      "timeSlot": "08:30",
+      "dayOfWeek": 6,
+      "dayName": "zaterdag",
+      "retryConfig": {
+        "maxRetries": 3,
+        "retryDelayMs": 5000
+      },
+      "description": "Saturday morning Pilates class"
+    }
+  ],
+  "globalSettings": {
+    "timezone": "Europe/Amsterdam",
+    "bookingStartTime": "00:00:10"
+  }
+}
